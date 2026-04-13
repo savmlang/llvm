@@ -1,9 +1,12 @@
 name: Build LLVM 22.1 Static
 
 on:
-  push: 
   schedule:
     - cron: '0 0 1 * *'
+  workflow_dispatch: 
+
+permissions:
+  contents: write
 
 jobs:
   linux:
