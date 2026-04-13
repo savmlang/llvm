@@ -64,7 +64,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get install -y ${{ matrix.install }}
+          sudo apt-get install -y lld ${{ matrix.install }}
 
       - name: Build LLVM
         working-directory: llvm
@@ -90,4 +90,7 @@ jobs:
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
             -DLLVM_BUILD_TOOLS=OFF
+            -DLLVM_INCLUDE_TESTS=OFF
+            -DLLVM_ENABLE_PLUGINS=OFF
+            -DLLVM_USE_LINKER=lld
           ninja -C build
