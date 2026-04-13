@@ -75,7 +75,8 @@ jobs:
           # LLVM Host
           cmake -G Ninja -S llvm -B build_native \
             -DLLVM_TARGETS_TO_BUILD="X86" \
-            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_USE_LINKER=lld
           ninja -C build_native llvm-tblgen
 
           rm -rf .git
@@ -92,8 +93,8 @@ jobs:
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
-            -DLLVM_BUILD_TOOLS=OFF
-            -DLLVM_INCLUDE_TESTS=OFF
-            -DLLVM_ENABLE_PLUGINS=OFF
+            -DLLVM_BUILD_TOOLS=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_ENABLE_PLUGINS=OFF \
             -DLLVM_USE_LINKER=lld
           ninja -C build
