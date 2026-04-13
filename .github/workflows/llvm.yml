@@ -23,23 +23,23 @@ jobs:
 
           # x86_64 (x64)
           - arch: X86
-            install: gcc g++
+            install: clang
             triple: x86_64-linux-gnu
 
           # i686 (x86 32-bit)
           - arch: X86
-            install: clang lld gcc-multilib
+            install: clang gcc-multilib g++-multilib
             triple: i686-linux-gnu
             flags: -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
 
           # LoongArch64 (GCC 13)
           - arch: LoongArch
-            install: clang lld libc6-dev-loong64-cross
+            install: clang libc6-dev-loong64-cross
             triple: loongarch64-linux-gnu
 
           # ARMv7 (HF)
           - arch: ARM
-            install: clang lld libc6-dev-armel-cross
+            install: clang libc6-dev-armel-cross
             triple: arm-linux-gnueabihf
 
 
