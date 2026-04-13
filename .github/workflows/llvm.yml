@@ -12,11 +12,40 @@ jobs:
     strategy:
       matrix:
         include:
+          # Arm64
           - arch: AArch64
             install: gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
             gpp: aarch64-linux-gnu-g++
             triple: aarch64-linux-gnu
+
+          # x86_64 (x64)
+          - arch: X86
+            install: gcc g++
+            gcc: gcc
+            gpp: g++
+            triple: x86_64-linux-gnu
+
+          # i686 (x86 32-bit)
+          - arch: X86
+            install: gcc-multilib g++-multilib
+            gcc: gcc
+            gpp: g++
+            triple: i686-linux-gnu
+
+          # LoongArch64
+          - arch: LoongArch
+            install: gcc-loongarch64-linux-gnu g++-loongarch64-linux-gnu
+            gcc: loongarch64-linux-gnu-gcc
+            gpp: loongarch64-linux-gnu-g++
+            triple: loongarch64-linux-gnu
+
+          # ARMv7 (Hard Float)
+          - arch: ARM
+            install: gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
+            gcc: arm-linux-gnueabihf-gcc
+            gpp: arm-linux-gnueabihf-g++
+            triple: arm-linux-gnueabihf
 
 
     runs-on: ubuntu-latest
@@ -31,6 +60,7 @@ jobs:
           repository: llvm/llvm-project
           path: llvm
           fetch-depth: 1
+          ref: llvmorg-22.1.3
 
       - name: Install Dependencies
         run: |
@@ -45,6 +75,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release
           ninja -C build_native llvm-tblgen
 
+          rm -rf .git
           cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
           rm -rf build_native
 
