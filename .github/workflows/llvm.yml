@@ -74,7 +74,7 @@ jobs:
 
       - name: Tar
         run: |
-          tar -czvf llvm-static-${{ matrix.triple }}.tar.gz \
+          tar -czvf llvm-static-${{ matrix.triple }}.tar.gz `
             -C llvm/build lib include
 
       - name: Upload Artifact
