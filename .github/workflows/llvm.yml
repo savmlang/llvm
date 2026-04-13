@@ -27,11 +27,11 @@ jobs:
 
           - arch: X86
             triple: x86_64-pc-windows-msvc
-            vsmode: x64_x86
+            vsmode: x64
 
           - arch: X86
             triple: i686-pc-windows-msvc
-            vsmode: x64
+            vsmode: x64_x86
 
     steps:
       - name: Git Large Path
