@@ -13,6 +13,78 @@ env:
   llvmversion: llvmorg-22.1.3
 
 jobs:
+  windows:
+    name: Build LLVM (${{ matrix.triple }})
+
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        include:
+          - arch: AArch64
+            triple: aarch64-pc-windows-msvc
+
+          - arch: X86
+            triple: x86_64-pc-windows-msvc
+
+          - arch: X86
+            triple: i686-pc-windows-msvc
+
+    steps:
+      - name: Git Large Path
+        run: git config --global core.longpaths true
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Checkout LLVM
+        uses: actions/checkout@v6
+        with:
+          repository: llvm/llvm-project
+          path: llvm
+          fetch-depth: 1
+          ref: ${{ env.llvmversion }}
+
+      - name: Restore Cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            llvm/build
+          key: ${{ matrix.triple }}-llvm-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ matrix.triple }}-llvm-
+
+      - name: Install Ninja
+        uses: llvm/actions/install-ninja@89a8cf80982d830faab019237860b344a6390c30
+
+      - name: Build LLVM
+        working-directory: llvm
+        run: |
+          # Build
+          cmake -G Ninja -S llvm -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} `
+            -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" `
+            -DLLVM_BUILD_TOOLS=OFF `
+            -DLLVM_INCLUDE_TESTS=OFF `
+            -DLLVM_ENABLE_PLUGINS=OFF
+
+          ninja -C build
+          rm -Force -Recurse ./build/bin/
+
+      - name: Tar
+        run: |
+          tar -czvf llvm-static-${{ matrix.triple }}.tar.gz \
+            -C llvm/build lib include
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: llvm-static-${{ matrix.triple }}
+          path: llvm-static-${{ matrix.triple }}.tar.gz
+          archive: false
+
+
   macos:
     name: Build LLVM (${{ matrix.triple }})
 
@@ -48,9 +120,9 @@ jobs:
           path: |
             llvm/build
             ~/.ccache
-          key: ${{ runner.os }}-llvm-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ matrix.triple }}-llvm-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-llvm-
+            ${{ matrix.triple }}-llvm-
 
       - name: Build LLVM
         working-directory: llvm
@@ -137,9 +209,9 @@ jobs:
           path: |
             llvm/build
             ~/.ccache
-          key: ${{ runner.os }}-llvm-${{ hashFiles('**/CMakeLists.txt') }}
+          key: ${{ matrix.triple }}-llvm-${{ hashFiles('**/CMakeLists.txt') }}
           restore-keys: |
-            ${{ runner.os }}-llvm-
+            ${{ matrix.triple }}-llvm-
 
       - name: Build LLVM
         working-directory: llvm
@@ -171,8 +243,7 @@ jobs:
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_ENABLE_PLUGINS=OFF \
-            -DLLVM_USE_LINKER=lld
-            ${{ matrix.flags }}
+            -DLLVM_USE_LINKER=lld ${{ matrix.flags }}
 
           ninja -C build
           rm -rf ./build/bin/
