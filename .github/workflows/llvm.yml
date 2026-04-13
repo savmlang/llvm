@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   linux:
-    name: Build LLVM (linux-${{ matrix.arch }})
+    name: Build LLVM (${{ matrix.triple }})
 
     strategy:
       matrix:
