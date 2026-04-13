@@ -1,6 +1,7 @@
 name: Build LLVM 22.1 Static
 
 on:
+  push:
   schedule:
     - cron: '0 0 1 * *'
   workflow_dispatch: 
@@ -81,7 +82,7 @@ jobs:
             -DLLVM_TARGETS_TO_BUILD="X86" \
             -DCMAKE_BUILD_TYPE=Release \
             -DLLVM_USE_LINKER=lld
-          ninja -C build_native llvm-tblgen
+          ninja -C build_native llvm-tblgen llvm-strip
 
           rm -rf .git
           cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
