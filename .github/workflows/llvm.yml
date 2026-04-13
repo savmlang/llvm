@@ -21,6 +21,7 @@ jobs:
             gcc: aarch64-linux-gnu-gcc
             gpp: aarch64-linux-gnu-g++
             triple: aarch64-linux-gnu
+            linker: -DLLVM_USE_LINKER=lld
 
           # x86_64 (x64)
           - arch: X86
@@ -28,6 +29,7 @@ jobs:
             gcc: gcc
             gpp: g++
             triple: x86_64-linux-gnu
+            linker: -DLLVM_USE_LINKER=lld
 
           # i686 (x86 32-bit)
           - arch: X86
@@ -35,6 +37,7 @@ jobs:
             gcc: gcc
             gpp: g++
             triple: i686-linux-gnu
+            linker: -DLLVM_USE_LINKER=lld
 
           # LoongArch64 (GCC 13)
           - arch: LoongArch
@@ -49,6 +52,7 @@ jobs:
             gcc: arm-linux-gnueabihf-gcc
             gpp: arm-linux-gnueabihf-g++
             triple: arm-linux-gnueabihf
+            linker: -DLLVM_USE_LINKER=lld
 
 
     runs-on: ubuntu-latest
@@ -81,6 +85,7 @@ jobs:
 
           rm -rf .git
           cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
+          cp $(pwd)/build_native/bin/llvm-strip $(pwd)/native-llvm-strip
           rm -rf build_native
 
           # Cross Build
@@ -95,6 +100,7 @@ jobs:
             -DLLVM_BUILD_STATIC=ON \
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_ENABLE_PLUGINS=OFF \
-            -DLLVM_USE_LINKER=lld
+            -DLLVM_ENABLE_PLUGINS=OFF ${{ matrix.linker }}
+
           ninja -C build
+          find build/bin -type f -executable -exec ./native-llvm-strip {} +
