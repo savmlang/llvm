@@ -33,14 +33,14 @@ jobs:
             gpp: g++
             triple: i686-linux-gnu
 
-          # LoongArch64
+          # LoongArch64 (GCC 13)
           - arch: LoongArch
-            install: gcc-loongarch64-linux-gnu g++-loongarch64-linux-gnu
-            gcc: loongarch64-linux-gnu-gcc
-            gpp: loongarch64-linux-gnu-g++
+            install: gcc-13-loongarch64-linux-gnu g++-13-loongarch64-linux-gnu
+            gcc: loongarch64-linux-gnu-gcc-13
+            gpp: loongarch64-linux-gnu-g++-13
             triple: loongarch64-linux-gnu
 
-          # ARMv7 (Hard Float)
+          # ARMv7 (HF)
           - arch: ARM
             install: gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
             gcc: arm-linux-gnueabihf-gcc
@@ -68,7 +68,7 @@ jobs:
             sudo add-apt-repository ppa:loongarch-dev/toolchain -y
             sudo apt-get update
           fi
-          
+
           sudo apt-get install -y ${{ matrix.install }}
 
       - name: Build LLVM
