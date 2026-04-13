@@ -42,12 +42,6 @@ jobs:
           fetch-depth: 1
           ref: ${{ env.llvmversion }}
 
-      - name: Install Dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install ninja
-          echo "PATH=$(brew --prefix ccache)/libexec:$PATH" >> $GITHUB_PATH
-
       - name: Restore Cache
         uses: actions/cache@v5
         with:
@@ -66,7 +60,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
-            -DLLVM_BUILD_STATIC=ON \
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_ENABLE_PLUGINS=OFF
