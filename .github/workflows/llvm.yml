@@ -91,7 +91,6 @@ jobs:
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_ENABLE_PLUGINS=OFF \
-            -DCMAKE_SYSROOT=/usr/${{ matrix.triple }} \
             ${{ matrix.flags }}
 
           ninja -C build
