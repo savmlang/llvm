@@ -18,7 +18,8 @@ jobs:
   windows:
     name: Build LLVM (${{ matrix.triple }})
 
-    runs-on: ${{ matrix.os || 'windows-2025-vs2026' }}
+    # Ironically, windows 11 Arm runs and builds times faster than windows-latest
+    runs-on: windows-11-arm
 
     strategy:
       matrix:
@@ -26,18 +27,14 @@ jobs:
           - arch: AArch64
             triple: aarch64-pc-windows-msvc
             vsmode: arm64
-            # Just use arm as windows is already slow as hell
-            os: windows-11-arm
 
           - arch: X86
             triple: x86_64-pc-windows-msvc
             vsmode: arm64_x64
-            # Testing if it can speed things up
-            os: windows-11-arm
 
           - arch: X86
             triple: i686-pc-windows-msvc
-            vsmode: x64_x86
+            vsmode: arm64_x86
 
     steps:
       - name: Git Large Path
