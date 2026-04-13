@@ -64,6 +64,11 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          if [[ "${{ matrix.arch }}" == "LoongArch" ]]; then
+            sudo add-apt-repository ppa:loongarch-dev/toolchain -y
+            sudo apt-get update
+          fi
+          
           sudo apt-get install -y ${{ matrix.install }}
 
       - name: Build LLVM
