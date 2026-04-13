@@ -46,12 +46,10 @@ jobs:
           - arch: AArch64
             os: macos-26
             triple: arm64-apple-darwin
-            flags: -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
           - arch: X86
             os: macos-26-intel
             triple: x86_64-apple-darwin
-            flags: -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
 
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -76,7 +74,7 @@ jobs:
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install ninja ccache
+          brew install ninja
           echo "PATH=$(brew --prefix ccache)/libexec:$PATH" >> $GITHUB_PATH
 
       - name: Restore Cache
