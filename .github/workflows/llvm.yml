@@ -46,10 +46,12 @@ jobs:
           - arch: AArch64
             os: macos-26
             triple: arm64-apple-darwin
+            flags: -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON
 
           - arch: X86
             os: macos-26-intel
             triple: x86_64-apple-darwin
+            flags: -DHAVE_CXX_ATOMICS_WITHOUT_LIB=ON
 
 
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
