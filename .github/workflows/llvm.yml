@@ -16,19 +16,22 @@ jobs:
   windows:
     name: Build LLVM (${{ matrix.triple }})
 
-    runs-on: windows-latest
+    runs-on: windows-2025-vs2026
 
     strategy:
       matrix:
         include:
           - arch: AArch64
             triple: aarch64-pc-windows-msvc
+            vsmode: x64_arm64
 
           - arch: X86
             triple: x86_64-pc-windows-msvc
+            vsmode: x64_x86
 
           - arch: X86
             triple: i686-pc-windows-msvc
+            vsmode: x64
 
     steps:
       - name: Git Large Path
@@ -59,18 +62,25 @@ jobs:
 
       - name: Build LLVM
         working-directory: llvm
+        shell: cmd
         run: |
-          # Build
-          cmake -G Ninja -S llvm -B build `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} `
-            -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" `
-            -DLLVM_BUILD_TOOLS=OFF `
-            -DLLVM_INCLUDE_TESTS=OFF `
+          for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do (
+            set "VS_PATH=%%i"
+          )
+
+          call "%VS_PATH%\VC\Auxiliary\Build\vcvarsall.bat" ${{ matrix.vsmode }}
+          
+          :: Build
+          cmake -G Ninja -S llvm -B build ^
+            -DCMAKE_BUILD_TYPE=Release ^
+            -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} ^
+            -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" ^
+            -DLLVM_BUILD_TOOLS=OFF ^
+            -DLLVM_INCLUDE_TESTS=OFF ^
             -DLLVM_ENABLE_PLUGINS=OFF
 
           ninja -C build
-          rm -Force -Recurse ./build/bin/
+          powershell rm -Force -Recurse ./build/bin/
 
       - name: Tar
         run: |
