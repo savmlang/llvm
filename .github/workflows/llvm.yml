@@ -1,0 +1,62 @@
+name: Build LLVM 22.1 Static
+
+on:
+  push: 
+  schedule:
+    - cron: '0 0 1 * *'
+
+jobs:
+  linux:
+    name: Build LLVM (linux-${{ matrix.arch }})
+
+    strategy:
+      matrix:
+        include:
+          - arch: AArch64
+            install: gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+            gcc: aarch64-linux-gnu-gcc
+            gpp: aarch64-linux-gnu-g++
+            triple: aarch64-linux-gnu
+
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Checkout LLVM
+        uses: actions/checkout@v6
+        with:
+          repository: llvm/llvm-project
+          path: llvm
+          fetch-depth: 1
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install -y ${{ matrix.install }}
+
+      - name: Build LLVM
+        working-directory: llvm
+        run: |
+          # LLVM Host
+          cmake -G Ninja -S llvm -B build_native \
+            -DLLVM_TARGETS_TO_BUILD="X86" \
+            -DCMAKE_BUILD_TYPE=Release
+          ninja -C build_native llvm-tblgen
+
+          cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
+          rm -rf build_native
+
+          # Cross Build
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_C_COMPILER=${{ matrix.gcc }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.gpp }} \
+            -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
+            -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
+            -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
+            -DLLVM_BUILD_STATIC=ON \
+            -DLLVM_BUILD_TOOLS=OFF
+          ninja -C build
