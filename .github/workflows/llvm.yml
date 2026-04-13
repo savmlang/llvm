@@ -26,11 +26,14 @@ jobs:
           - arch: AArch64
             triple: aarch64-pc-windows-msvc
             vsmode: x64_arm64
+            # Just use arm as windows is already slow as hell
             os: windows-11-arm
 
           - arch: X86
             triple: x86_64-pc-windows-msvc
             vsmode: x64
+            # Testing if it can speed things up
+            os: windows-11-arm
 
           - arch: X86
             triple: i686-pc-windows-msvc
