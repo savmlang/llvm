@@ -18,38 +18,28 @@ jobs:
         include:
           # Arm64
           - arch: AArch64
-            install: gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-            gcc: aarch64-linux-gnu-gcc
-            gpp: aarch64-linux-gnu-g++
+            install: clang libc6-dev-arm64-cross
             triple: aarch64-linux-gnu
 
           # x86_64 (x64)
           - arch: X86
             install: gcc g++
-            gcc: gcc
-            gpp: g++
             triple: x86_64-linux-gnu
 
           # i686 (x86 32-bit)
           - arch: X86
-            install: gcc-multilib g++-multilib
-            gcc: gcc
-            gpp: g++
+            install: clang lld gcc-multilib
             triple: i686-linux-gnu
             flags: -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
 
           # LoongArch64 (GCC 13)
           - arch: LoongArch
-            install: gcc-13-loongarch64-linux-gnu g++-13-loongarch64-linux-gnu
-            gcc: loongarch64-linux-gnu-gcc-13
-            gpp: loongarch64-linux-gnu-g++-13
+            install: clang lld libc6-dev-loong64-cross
             triple: loongarch64-linux-gnu
 
           # ARMv7 (HF)
           - arch: ARM
-            install: gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf
-            gcc: arm-linux-gnueabihf-gcc
-            gpp: arm-linux-gnueabihf-g++
+            install: clang lld libc6-dev-armel-cross
             triple: arm-linux-gnueabihf
 
 
@@ -74,31 +64,47 @@ jobs:
       - name: Build LLVM
         working-directory: llvm
         run: |
+          export CC=clang
+          export CXX=clang++
+
           # LLVM Host
           cmake -G Ninja -S llvm -B build_native \
             -DLLVM_TARGETS_TO_BUILD="X86" \
             -DCMAKE_BUILD_TYPE=Release \
             -DLLVM_USE_LINKER=lld
-          ninja -C build_native llvm-tblgen llvm-strip
+          ninja -C build_native llvm-tblgen
 
           rm -rf .git
           cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
-          cp $(pwd)/build_native/bin/llvm-strip $(pwd)/native-llvm-strip
           rm -rf build_native
 
           # Cross Build
           cmake -G Ninja -S llvm -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_C_COMPILER=${{ matrix.gcc }} \
-            -DCMAKE_CXX_COMPILER=${{ matrix.gpp }} \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
             -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_ENABLE_PLUGINS=OFF ${{ matrix.flags }}
+            -DLLVM_ENABLE_PLUGINS=OFF \
+            -DCMAKE_SYSROOT=/usr/${{ matrix.triple }} \
+            ${{ matrix.flags }}
 
           ninja -C build
-          find build/bin -type f -executable -exec ./native-llvm-strip {} +
+          rm -rf ./build/bin/
+
+      - name: Tar
+        run: |
+          tar -czvf llvm-static-${{ matrix.triple }}.tar.gz \
+            -C llvm/build lib include
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: llvm-static-${{ matrix.triple }}
+          path: llvm-static-${{ matrix.triple }}.tar.gz
+          archive: false
