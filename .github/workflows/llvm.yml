@@ -90,6 +90,7 @@ jobs:
             -DLLVM_BUILD_STATIC=ON \
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_USE_LINKER=lld \
             -DLLVM_ENABLE_PLUGINS=OFF \
             ${{ matrix.flags }}
 
