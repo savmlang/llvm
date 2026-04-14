@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 env:
   llvmversion: llvmorg-22.1.3
