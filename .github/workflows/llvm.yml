@@ -6,14 +6,20 @@ on:
       - .github/workflows/llvm.yml
   schedule:
     - cron: '0 0 1 * *'
-  workflow_dispatch: 
+  workflow_dispatch:
+    inputs:
+      llvmversion:
+        type: string
+        default: llvmorg-22.1.3
+        description: Enter the llvmorg version
+        required: true
 
 permissions:
   contents: write
   actions: read
 
 env:
-  llvmversion: llvmorg-22.1.3
+  llvmversion: ${{ github.event.inputs.llvmversion || 'llvmorg-22.1.3' }}
 
 jobs:
   windows:
@@ -88,7 +94,7 @@ jobs:
         with:
           name: llvm-static-${{ matrix.triple }}
           path: llvm-static-${{ matrix.triple }}.tar.gz
-          archive: false
+          archive: true
 
 
   macos:
@@ -146,7 +152,7 @@ jobs:
         with:
           name: llvm-static-${{ matrix.triple }}
           path: llvm-static-${{ matrix.triple }}.tar.gz
-          archive: false
+          archive: true
 
 
   linux:
@@ -261,7 +267,7 @@ jobs:
         with:
           name: llvm-static-${{ matrix.triple }}
           path: llvm-static-${{ matrix.triple }}.tar.gz
-          archive: false
+          archive: true
 
   release-llvm:
     name: Release LLVM
