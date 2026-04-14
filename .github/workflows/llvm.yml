@@ -192,7 +192,7 @@ jobs:
             triple: powerpc64le-linux-gnu
 
           # MIPS64
-          - arch: MIPS
+          - arch: Mips
             install: clang libc6-dev-mips64el-cross
             triple: mips64el-linux-gnu
 
