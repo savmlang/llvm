@@ -179,7 +179,22 @@ jobs:
           # ARMv7 (HF)
           - arch: ARM
             install: clang libc6-dev-armel-cross
-            triple: arm-linux-gnueabihf            
+            triple: arm-linux-gnueabihf
+          
+          # RISCV64
+          - arch: RISCV
+            install: clang libc6-dev-riscv64-cross
+            triple: riscv64-linux-gnu
+
+          # PowerPC
+          - arch: PowerPC
+            install: clang libc6-dev-ppc64el-cross
+            triple: powerpc64le-linux-gnu
+
+          # MIPS64
+          - arch: MIPS
+            install: clang libc6-dev-mips64el-cross
+            triple: mips64el-linux-gnu
 
 
     runs-on: ubuntu-latest
@@ -260,10 +275,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
-        with:
-          path: release
-          merge-multiple: true
+        run: gh run download ${{ github.run_id }} --dir release
 
       - name: Generate timestamp
         id: time
