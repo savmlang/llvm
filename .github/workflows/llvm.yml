@@ -59,7 +59,7 @@ jobs:
           ref: ${{ env.llvmversion }}
 
       - name: Install Ninja
-        uses: llvm/actions/install-ninja@89a8cf80982d830faab019237860b344a6390c30
+        run: pip install ninja
 
       - name: Build LLVM
         working-directory: llvm
