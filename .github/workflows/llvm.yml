@@ -256,7 +256,11 @@ jobs:
             -DLLVM_INCLUDE_TESTS=OFF \
             -DLLVM_ENABLE_PLUGINS=OFF \
             -DCMAKE_INSTALL_PREFIX=install \
-            -DLLVM_USE_LINKER=lld ${{ matrix.flags }}
+            -DLLVM_USE_LINKER=lld ${{ matrix.flags }} \
+            -DLLVM_ENABLE_ZLIB=OFF \
+            -DLLVM_ENABLE_ZSTD=OFF \
+            -DLLVM_ENABLE_TERMINFO=OFF \
+            -DLLVM_STATIC_LINK_CXX_STDLIB=ON
 
           ninja -C build llvm-config 
           ninja -C build install
