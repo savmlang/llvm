@@ -142,7 +142,7 @@ jobs:
             -DLLVM_ENABLE_PLUGINS=OFF \
             -DCMAKE_INSTALL_PREFIX=install
 
-          ninja -C build llvm-config LLVM
+          ninja -C build llvm-config
           ninja -C build install
 
           mkdir -p install/bin
@@ -258,7 +258,7 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=install \
             -DLLVM_USE_LINKER=lld ${{ matrix.flags }}
 
-          ninja -C build llvm-config LLVM
+          ninja -C build llvm-config 
           ninja -C build install
 
           mkdir -p install/bin
