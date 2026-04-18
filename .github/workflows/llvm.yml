@@ -81,7 +81,12 @@ jobs:
             -DLLVM_ENABLE_PLUGINS=OFF ^
             -DCMAKE_INSTALL_PREFIX=install
 
+          ninja -C build llvm-config
           ninja -C build install
+
+          if not exist "install\bin\llvm-config.exe" (
+            copy "build\bin\llvm-config.exe" "install\bin\"
+          )
 
       - name: Tar
         run: |
@@ -137,7 +142,11 @@ jobs:
             -DLLVM_ENABLE_PLUGINS=OFF \
             -DCMAKE_INSTALL_PREFIX=install
 
+          ninja -C build llvm-config LLVM
           ninja -C build install
+
+          mkdir -p install/bin
+          cp build/bin/llvm-config* install/bin/
 
       - name: Tar
         run: |
@@ -249,7 +258,11 @@ jobs:
             -DCMAKE_INSTALL_PREFIX=install \
             -DLLVM_USE_LINKER=lld ${{ matrix.flags }}
 
+          ninja -C build llvm-config LLVM
           ninja -C build install
+
+          mkdir -p install/bin
+          cp build/bin/llvm-config* install/bin/
 
       - name: Tar
         run: |
