@@ -248,8 +248,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld" \
             -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
