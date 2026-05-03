@@ -189,7 +189,7 @@ jobs:
 
           # ARMv7 (HF)
           - arch: ARM
-            install: clang libc6-dev-armel-cross
+            install: clang libc6-dev-armhf-cross g++-arm-linux-gnueabihf
             triple: arm-linux-gnueabihf
 
           # RISCV64
@@ -248,6 +248,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }}" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }}" \
             -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
