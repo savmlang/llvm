@@ -172,45 +172,72 @@ jobs:
             install: clang lld libc6-dev-arm64-cross crossbuild-essential-arm64
               gcc-aarch64-linux-gnu binutils-aarch64-linux-gnu
             triple: aarch64-linux-gnu
+            script: |
+              sudo dpkg --add-architecture arm64
+              sudo apt-get update
+              sudo apt-get install -y libc6:arm64 libgcc1:arm64
 
           # x86_64 (x64)
           - arch: X86
             install: clang lld
             triple: x86_64-linux-gnu
+            sysroot: ""
 
           # i686 (x86 32-bit)
           - arch: X86
             install: clang lld gcc-multilib g++-multilib
             triple: i686-linux-gnu
             flags: -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
+            sysroot: ""
 
           # LoongArch64
-          - arch: LoongArch
-            install: clang lld libc6-dev-loong64-cross
-            triple: loongarch64-linux-gnu
+          # - arch: LoongArch
+          #   install: clang lld libc6-dev-loong64-cross
+          #   triple: loongarch64-linux-gnu
+          #   script: |
+          #     sudo dpkg --add-architecture arm64
+          #     sudo apt-get update
+          #     sudo apt-get install -y libc6:arm64 libgcc1:arm64
 
           # ARMv7 (HF)
           - arch: ARM
-            install: clang lld libc6-dev-armhf-cross g++-arm-linux-gnueabihf
+            install: clang lld libc6-dev-armhf-cross gcc-arm-linux-gnueabihf
               binutils-arm-linux-gnueabihf
             triple: arm-linux-gnueabihf
+            script: |
+              sudo dpkg --add-architecture armhf
+              sudo apt-get update
+              sudo apt-get install -y libc6:armhf libgcc1:armhf
 
           # RISCV64
           - arch: RISCV
             install: clang lld libc6-dev-riscv64-cross gcc-riscv64-linux-gnu
               binutils-riscv64-linux-gnu
             triple: riscv64-linux-gnu
+            script: |
+              sudo dpkg --add-architecture riscv64
+              sudo apt-get update
+              sudo apt-get install -y libc6:riscv64 libgcc1:riscv64
 
           # PowerPC
           - arch: PowerPC
             install: clang lld libc6-dev-ppc64el-cross gcc-powerpc64le-linux-gnu
               binutils-powerpc64le-linux-gnu
             triple: powerpc64le-linux-gnu
+            script: |
+              sudo dpkg --add-architecture ppc64el
+              sudo apt-get update
+              sudo apt-get install -y libc6:ppc64el libgcc1:ppc64el
+
           # MIPS64
           - arch: Mips
-            install: clang lld libc6-dev-mips64el-cross gcc-mips64el-linux-gnu
-              binutils-mips64el-linux-gnu
+            install: clang lld libc6-dev-mips64el-cross gcc-mips64el-linux-gnuabi64
+              binutils-mips64el-linux-gnuabi64
             triple: mips64el-linux-gnu
+            script: |
+              sudo dpkg --add-architecture mips64el
+              sudo apt-get update
+              sudo apt-get install -y libc6:mips64el libgcc1:mips64el
 
     runs-on: ubuntu-latest
 
@@ -229,6 +256,7 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get install -y lld ${{ matrix.install }}
+          ${{ matrix.script }}
 
       - name: Build LLVM
         working-directory: llvm
@@ -253,8 +281,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld --sysroot=/usr/${{ matrix.triple }}" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld --sysroot=/usr/${{ matrix.triple }}" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld --sysroot=/usr/${{ matrix.sysroot || matrix.triple }}" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld --sysroot=/usr/${{ matrix.sysroot || matrix.triple }}" \
             -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
