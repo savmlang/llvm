@@ -232,7 +232,7 @@ jobs:
             # MIPS64
           - arch: Mips
             install: clang lld libc6-dev-mips64el-cross gcc-mips64el-linux-gnuabi64
-              binutils-mips64el-linux-gnuabi64
+              g++-mips64el-linux-gnuabi64 binutils-mips64el-linux-gnuabi64
             triple: mips64el-linux-gnuabi64
             # dpkg: sudo dpkg --add-architecture mips64el
             # script: |
@@ -302,6 +302,7 @@ jobs:
             -DLLVM_BUILD_STATIC=ON \
             -DLLVM_BUILD_TOOLS=OFF \
             -DLLVM_INCLUDE_TESTS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DLLVM_ENABLE_PLUGINS=OFF \
             -DCMAKE_INSTALL_PREFIX=install \
             -DLLVM_USE_LINKER=lld ${{ matrix.flags }} \
