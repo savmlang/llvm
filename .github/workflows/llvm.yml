@@ -202,7 +202,7 @@ jobs:
           # ARMv7 (HF)
           - arch: ARM
             install: clang lld libc6-dev-armhf-cross gcc-arm-linux-gnueabihf
-              binutils-arm-linux-gnueabihf
+              g++-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
             triple: arm-linux-gnueabihf
             dpkg: sudo dpkg --add-architecture armhf
             script: |
@@ -212,7 +212,7 @@ jobs:
             # RISCV64
           - arch: RISCV
             install: clang lld libc6-dev-riscv64-cross gcc-riscv64-linux-gnu
-              binutils-riscv64-linux-gnu
+              g++-riscv64-linux-gnu binutils-riscv64-linux-gnu
             triple: riscv64-linux-gnu
             dpkg: sudo dpkg --add-architecture riscv64
             script: |
@@ -222,7 +222,7 @@ jobs:
             # PowerPC
           - arch: PowerPC
             install: clang lld libc6-dev-ppc64el-cross gcc-powerpc64le-linux-gnu
-              binutils-powerpc64le-linux-gnu
+              g++-powerpc64le-linux-gnu binutils-powerpc64le-linux-gnu
             triple: powerpc64le-linux-gnu
             dpkg: sudo dpkg --add-architecture ppc64el
             script: |
