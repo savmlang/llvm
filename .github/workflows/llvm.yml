@@ -242,11 +242,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get install -y lld ${{ matrix.install }}
-
           ${{ matrix.dpkg }}
-
-          sudo apt-get update -o Acquire::RaiseErrors=false
 
           # 1. Update existing sources to only look for amd64
           sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
@@ -261,6 +257,7 @@ jobs:
           EOF
 
           sudo apt-get update -o Acquire::RaiseErrors=false
+          sudo apt-get install -y lld ${{ matrix.install }}
           ${{ matrix.script }}
 
       - name: Checkout LLVM
