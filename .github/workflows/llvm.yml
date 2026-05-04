@@ -174,7 +174,8 @@ jobs:
             triple: aarch64-linux-gnu
             dpkg: sudo dpkg --add-architecture arm64
             script: |
-              sudo apt-get install -y libc6:arm64 libgcc1:arm64
+              sudo apt-get install -y --fix-missing libc6:arm64 libgcc1:arm64
+            sysroot: --sysroot=/usr/aarch64-linux-gnu
 
           # x86_64 (x64)
           - arch: X86
@@ -205,7 +206,8 @@ jobs:
             triple: arm-linux-gnueabihf
             dpkg: sudo dpkg --add-architecture armhf
             script: |
-              sudo apt-get install -y libc6:armhf libgcc1:armhf
+              sudo apt-get install -y --fix-missing libc6:armhf libgcc1:armhf
+            sysroot: --sysroot=/usr/arm-linux-gnueabihf
 
           # RISCV64
           - arch: RISCV
@@ -214,7 +216,8 @@ jobs:
             triple: riscv64-linux-gnu
             dpkg: sudo dpkg --add-architecture riscv64
             script: |
-              sudo apt-get install -y libc6:riscv64 libgcc1:riscv64
+              sudo apt-get install -y --fix-missing libc6:riscv64 libgcc1:riscv64
+            sysroot: --sysroot=/usr/riscv64-linux-gnu
 
           # PowerPC
           - arch: PowerPC
@@ -223,7 +226,8 @@ jobs:
             triple: powerpc64le-linux-gnu
             dpkg: sudo dpkg --add-architecture ppc64el
             script: |
-              sudo apt-get install -y libc6:ppc64el libgcc1:ppc64el
+              sudo apt-get install -y --fix-missing libc6:ppc64el libgcc1:ppc64el
+            sysroot: --sysroot=/usr/powerpc64le-linux-gnu
 
           # MIPS64
           - arch: Mips
@@ -232,7 +236,8 @@ jobs:
             triple: mips64el-linux-gnu
             dpkg: sudo dpkg --add-architecture mips64el
             script: |
-              sudo apt-get install -y libc6:mips64el libgcc1:mips64el
+              sudo apt-get install -y --fix-missing libc6:mips64el libgcc1:mips64el
+            sysroot: --sysroot=/usr/mips64el-linux-gnu
 
     runs-on: ubuntu-latest
 
@@ -242,8 +247,6 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          ${{ matrix.dpkg }}
-
           # 1. Update existing sources to only look for amd64
           sudo sed -i 's/^deb http/deb [arch=amd64] http/' /etc/apt/sources.list
           sudo find /etc/apt/sources.list.d/ -type f -name "*.list" -exec sudo sed -i 's/^deb http/deb [arch=amd64] http/' {} +
@@ -254,8 +257,10 @@ jobs:
           deb [arch=arm64,armhf,riscv64,ppc64el,mips64el] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
           EOF
 
-          sudo apt-get update -o Acquire::RaiseErrors=false
-          sudo apt-get install -y lld ${{ matrix.install }}
+          ${{ matrix.dpkg }}
+
+          sudo apt-get update -o Acquire::RaiseErrors=false || true
+          sudo apt-get install -y --fix-missing lld ${{ matrix.install }}
           ${{ matrix.script }}
 
       - name: Checkout LLVM
@@ -289,8 +294,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld --sysroot=/usr/${{ matrix.sysroot || matrix.triple }}" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld --sysroot=/usr/${{ matrix.sysroot || matrix.triple }}" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld ${{ matrix.sysroot }}" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld ${{ matrix.sysroot }}" \
             -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
