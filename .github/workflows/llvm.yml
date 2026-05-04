@@ -256,6 +256,18 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get install -y lld ${{ matrix.install }}
+
+          # 1. Update existing sources to only look for amd64
+          sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
+          sudo sed -i 's/deb htp/deb [arch=amd64] htp/g' /etc/apt/sources.list
+
+          cat <<EOF | sudo tee /etc/apt/sources.list.d/arm-ports.list
+          deb [arch=arm64,armhf,riscv64,ppc64el,mips64el] http://ports.ubuntu.com/ubuntu-ports noble main restricted universe multiverse
+          deb [arch=arm64,armhf,riscv64,ppc64el,mips64el] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted universe multiverse
+          deb [arch=arm64,armhf,riscv64,ppc64el,mips64el] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
+          EOF
+
+          sudo apt-get update
           ${{ matrix.script }}
 
       - name: Build LLVM
