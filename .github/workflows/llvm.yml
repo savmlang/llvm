@@ -164,6 +164,7 @@ jobs:
     name: Build LLVM (${{ matrix.triple }})
 
     strategy:
+      fail-fast: false
       matrix:
         include:
           # Arm64
@@ -185,7 +186,7 @@ jobs:
 
           # LoongArch64
           - arch: LoongArch
-            install: clang lld libc6-dev-loong64-cross gcc-loongarch64-linux-gnu
+            install: clang lld libc6-dev-loong64-cross
             triple: loongarch64-linux-gnu
 
           # ARMv7 (HF)
