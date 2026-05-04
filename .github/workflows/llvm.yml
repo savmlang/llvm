@@ -254,6 +254,8 @@ jobs:
 
           ${{ matrix.dpkg }}
 
+          sudo apt-get update -o Acquire::RaiseErrors=false
+
           # 1. Update existing sources to only look for amd64
           sudo sed -i 's/deb http/deb [arch=amd64] http/g' /etc/apt/sources.list
           sudo sed -i 's/deb htp/deb [arch=amd64] htp/g' /etc/apt/sources.list
