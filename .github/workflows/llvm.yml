@@ -240,14 +240,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Checkout LLVM
-        uses: actions/checkout@v6
-        with:
-          repository: llvm/llvm-project
-          path: llvm
-          fetch-depth: 1
-          ref: ${{ env.llvmversion }}
-
       - name: Install Dependencies
         run: |
           sudo apt-get install -y lld ${{ matrix.install }}
@@ -268,8 +260,16 @@ jobs:
           deb [arch=arm64,armhf,riscv64,ppc64el,mips64el] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted universe multiverse
           EOF
 
-          sudo apt-get update
+          sudo apt-get update -o Acquire::RaiseErrors=false
           ${{ matrix.script }}
+
+      - name: Checkout LLVM
+        uses: actions/checkout@v6
+        with:
+          repository: llvm/llvm-project
+          path: llvm
+          fetch-depth: 1
+          ref: ${{ env.llvmversion }}
 
       - name: Build LLVM
         working-directory: llvm
