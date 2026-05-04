@@ -175,9 +175,9 @@ jobs:
             dpkg: sudo dpkg --add-architecture arm64
             script: |
               sudo apt-get install -y --fix-missing libc6:arm64 libgcc1:arm64
-            sysroot: --sysroot=/usr/aarch64-linux-gnu
+            # sysroot: --sysroot=/usr/aarch64-linux-gnu
 
-          # x86_64 (x64)
+            # x86_64 (x64)
           - arch: X86
             install: clang lld
             triple: x86_64-linux-gnu
@@ -207,9 +207,9 @@ jobs:
             dpkg: sudo dpkg --add-architecture armhf
             script: |
               sudo apt-get install -y --fix-missing libc6:armhf libgcc1:armhf
-            sysroot: --sysroot=/usr/arm-linux-gnueabihf
+            # sysroot: --sysroot=/usr/arm-linux-gnueabihf
 
-          # RISCV64
+            # RISCV64
           - arch: RISCV
             install: clang lld libc6-dev-riscv64-cross gcc-riscv64-linux-gnu
               binutils-riscv64-linux-gnu
@@ -217,9 +217,9 @@ jobs:
             dpkg: sudo dpkg --add-architecture riscv64
             script: |
               sudo apt-get install -y --fix-missing libc6:riscv64 libgcc1:riscv64
-            sysroot: --sysroot=/usr/riscv64-linux-gnu
+            # sysroot: --sysroot=/usr/riscv64-linux-gnu
 
-          # PowerPC
+            # PowerPC
           - arch: PowerPC
             install: clang lld libc6-dev-ppc64el-cross gcc-powerpc64le-linux-gnu
               binutils-powerpc64le-linux-gnu
@@ -227,9 +227,9 @@ jobs:
             dpkg: sudo dpkg --add-architecture ppc64el
             script: |
               sudo apt-get install -y --fix-missing libc6:ppc64el libgcc1:ppc64el
-            sysroot: --sysroot=/usr/powerpc64le-linux-gnu
+            # sysroot: --sysroot=/usr/powerpc64le-linux-gnu
 
-          # MIPS64
+            # MIPS64
           - arch: Mips
             install: clang lld libc6-dev-mips64el-cross gcc-mips64el-linux-gnuabi64
               binutils-mips64el-linux-gnuabi64
@@ -237,7 +237,7 @@ jobs:
             dpkg: sudo dpkg --add-architecture mips64el
             script: |
               sudo apt-get install -y --fix-missing libc6:mips64el libgcc1:mips64el
-            sysroot: --sysroot=/usr/mips64el-linux-gnu
+            # sysroot: --sysroot=/usr/mips64el-linux-gnu
 
     runs-on: ubuntu-latest
 
