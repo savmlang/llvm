@@ -78,7 +78,7 @@ jobs:
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" ^
             -DLLVM_BUILD_TOOLS=OFF ^
             -DLLVM_INCLUDE_TESTS=OFF ^
-            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+            -DLLVM_ENABLE_PROJECTS="llvm;lld" ^
             -DLLVM_ENABLE_PLUGINS=OFF ^
             -DCMAKE_INSTALL_PREFIX=install
 
