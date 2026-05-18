@@ -246,8 +246,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -B${GCC_DIR} -L${GCC_DIR} -fuse-ld=lld" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -I${CXX_INCLUDE_DIR} -B${GCC_DIR} -L${GCC_DIR} -fuse-ld=lld" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -B${GCC_DIR} -L${GCC_DIR} -fuse-ld=lld -latomic" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -I${CXX_INCLUDE_DIR} -B${GCC_DIR} -L${GCC_DIR} -fuse-ld=lld -latomic" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
