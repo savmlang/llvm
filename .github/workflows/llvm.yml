@@ -221,14 +221,14 @@ jobs:
 
       - name: Download Musl Target Sysroot
         run: |
-          URL="https://github.com/cross-tools/musl-cross/releases/latest/download/${TARGET}.tar.xz"
+          URL="https://github.com/cross-tools/musl-cross/releases/latest/download/${{ matrix.toolchain }}.tar.xz"
 
           echo "Downloading toolchain from $URL"
           wget $URL -O musl-cross.tar.xz
           tar -xf musl-cross.tar.xz
           
           # The inner target directory acts perfectly as the isolated sysroot
-          echo "SYSROOT_DIR=$(pwd)/${TARGET}/${TARGET}" >> $GITHUB_ENV
+          echo "SYSROOT_DIR=$(pwd)/${{ matrix.toolchain }}/${{ matrix.toolchain }}" >> $GITHUB_ENV
 
       - name: Build LLVM
         working-directory: llvm
