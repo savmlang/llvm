@@ -229,6 +229,7 @@ jobs:
           
           # The inner target directory acts perfectly as the isolated sysroot
           echo "SYSROOT_DIR=$(pwd)/${{ matrix.toolchain }}/${{ matrix.toolchain }}/sysroot" >> $GITHUB_ENV
+          echo "TARGET_DIR=$(pwd)/${{ matrix.toolchain }}" >> $GITHUB_ENV
 
       - name: Build LLVM
         working-directory: llvm
@@ -236,14 +237,17 @@ jobs:
           export CC=clang
           export CXX=clang++
 
+          CXX_INCLUDE_DIR=$(find ${{ env.TARGET_DIR }} -type d -name "c++" | head -n 1)
+          GCC_DIR=$(dirname $(find ${{ env.TARGET_DIR }} -name "libgcc.a" | head -n 1))
+
           # Cross Build
           cmake -G Ninja -S llvm -B build \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -B${GCC_DIR} -L${GCC_DIR} -fuse-ld=lld" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -I${CXX_INCLUDE_DIR} -B${GCC_DIR} -L${GCC_DIR} -fuse-ld=lld" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
