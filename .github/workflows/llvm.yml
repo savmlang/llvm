@@ -162,6 +162,118 @@ jobs:
           path: llvm-static-${{ matrix.triple }}.tar.gz
           archive: true
 
+  linux_musl:
+    name: Build LLVM MUSL-Alpine (${{ matrix.triple }})
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Arm64
+          - arch: AArch64
+            triple: aarch64-linux-musl
+            toolchain_url: https://musl.cc/aarch64-linux-musl-cross.tgz
+
+            # x86_64 (x64)
+          - arch: X86
+            triple: x86_64-linux-musl
+            toolchain_url: https://musl.cc/x86_64-linux-musl-cross.tgz
+
+          # i686 (x86 32-bit)
+          - arch: X86
+            triple: i686-linux-musl
+            flags: -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
+            toolchain_url: https://musl.cc/i686-linux-musl-cross.tgz
+
+          # ARMv7 (HF)
+          - arch: ARM
+            triple: arm-linux-musleabihf
+            toolchain_url: https://musl.cc/arm-linux-musleabihf-cross.tgz
+
+            # RISCV64
+          - arch: RISCV
+            triple: riscv64-linux-musl
+            toolchain_url: https://musl.cc/riscv64-linux-musl-cross.tgz
+
+            # PowerPC
+          - arch: PowerPC
+            triple: powerpc64le-linux-musl
+            toolchain_url: https://musl.cc/powerpc64le-linux-musl-cross.tgz
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --fix-missingb clang lld qemu-user-static binfmt-support
+
+      - name: Checkout LLVM
+        uses: actions/checkout@v6
+        with:
+          repository: llvm/llvm-project
+          path: llvm
+          fetch-depth: 1
+          ref: ${{ env.llvmversion }}
+
+      - name: Download Musl Target Sysroot
+        run: |
+          wget ${{ matrix.toolchain_url }} -O musl-cross.tgz
+          tar -xzf musl-cross.tgz
+          # This gives us a directory like 'aarch64-linux-musl-cross'
+          echo "SYSROOT_DIR=$(ls -d *-linux-musl*-cross)/${{ matrix.triple }}" >> $GITHUB_ENV
+
+      - name: Build LLVM
+        working-directory: llvm
+        run: |
+          export CC=clang
+          export CXX=clang++
+
+          # Cross Build
+          cmake -G Ninja -S llvm -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=$(pwd)/${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=$(pwd)/${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
+            -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
+            -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
+            -DLLVM_BUILD_STATIC=ON \
+            -DLLVM_BUILD_TOOLS=OFF \
+            -DLLVM_TOOL_LTO_BUILD=OFF \
+            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DLLVM_ENABLE_PLUGINS=OFF \
+            -DCMAKE_INSTALL_PREFIX=install \
+            -DLLVM_USE_LINKER=lld ${{ matrix.flags }} \
+            -DLLVM_ENABLE_ZLIB=OFF \
+            -DLLVM_ENABLE_ZSTD=OFF \
+            -DLLVM_ENABLE_TERMINFO=OFF \
+            -DLLVM_STATIC_LINK_CXX_STDLIB=ON
+
+          ninja -C build llvm-config 
+          ninja -C build install
+
+          mkdir -p install/bin
+          cp build/bin/llvm-config* install/bin/
+
+      - name: Tar
+        run: |
+          tar -czvf llvm-static-${{ matrix.triple }}.tar.gz \
+            -C llvm/install lib include bin
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: llvm-static-${{ matrix.triple }}
+          path: llvm-static-${{ matrix.triple }}.tar.gz
+          archive: true
+
   linux:
     name: Build LLVM (${{ matrix.triple }})
 
@@ -177,7 +289,6 @@ jobs:
             dpkg: sudo dpkg --add-architecture arm64
             script: |
               sudo apt-get install -y --fix-missing libc6:arm64 libgcc1:arm64
-            # sysroot: --sysroot=/usr/aarch64-linux-gnu
 
             # x86_64 (x64)
           - arch: X86
@@ -209,7 +320,6 @@ jobs:
             dpkg: sudo dpkg --add-architecture armhf
             script: |
               sudo apt-get install -y --fix-missing libc6:armhf libgcc1:armhf
-            # sysroot: --sysroot=/usr/arm-linux-gnueabihf
 
             # RISCV64
           - arch: RISCV
@@ -219,7 +329,6 @@ jobs:
             dpkg: sudo dpkg --add-architecture riscv64
             script: |
               sudo apt-get install -y --fix-missing libc6:riscv64 libgcc1:riscv64
-            # sysroot: --sysroot=/usr/riscv64-linux-gnu
 
             # PowerPC
           - arch: PowerPC
@@ -229,17 +338,12 @@ jobs:
             dpkg: sudo dpkg --add-architecture ppc64el
             script: |
               sudo apt-get install -y --fix-missing libc6:ppc64el libgcc1:ppc64el
-            # sysroot: --sysroot=/usr/powerpc64le-linux-gnu
 
             # MIPS64
           - arch: Mips
             install: clang lld libc6-dev-mips64el-cross gcc-mips64el-linux-gnuabi64
               g++-mips64el-linux-gnuabi64 binutils-mips64el-linux-gnuabi64
             triple: mips64el-linux-gnuabi64
-            # dpkg: sudo dpkg --add-architecture mips64el
-            # script: |
-            #   sudo apt-get install -y --fix-missing libc6:mips64el libgcc1:mips64el
-            # sysroot: --sysroot=/usr/mips64el-linux-gnuabi64
 
     runs-on: ubuntu-latest
 
@@ -338,7 +442,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [ windows, macos, linux ]
+    needs: [ windows, macos, linux, linux_musl ]
 
     steps:
       - name: Checkout
