@@ -262,7 +262,8 @@ jobs:
             -DLLVM_ENABLE_ZLIB=OFF \
             -DLLVM_ENABLE_ZSTD=OFF \
             -DLLVM_ENABLE_TERMINFO=OFF \
-            -DLLVM_STATIC_LINK_CXX_STDLIB=ON
+            -DLLVM_STATIC_LINK_CXX_STDLIB=ON \
+            -DLLVM_FORCE_USE_OLD_TOOLCHAIN=ON # Safety: Definitely Vibes Checked, though its g++ 16.1.0
 
           ninja -C build llvm-config 
           ninja -C build install
