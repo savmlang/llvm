@@ -172,33 +172,33 @@ jobs:
           # Arm64
           - arch: AArch64
             triple: aarch64-linux-musl
-            toolchain_url: https://musl.cc/aarch64-linux-musl-cross.tgz
+            toolchain: aarch64-unknown-linux-musl
 
             # x86_64 (x64)
           - arch: X86
             triple: x86_64-linux-musl
-            toolchain_url: https://musl.cc/x86_64-linux-musl-cross.tgz
+            toolchain: x86_64-unknown-linux-musl
 
           # i686 (x86 32-bit)
           - arch: X86
             triple: i686-linux-musl
             flags: -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
-            toolchain_url: https://musl.cc/i686-linux-musl-cross.tgz
+            toolchain: i686-unknown-linux-musl
 
           # ARMv7 (HF)
           - arch: ARM
             triple: arm-linux-musleabihf
-            toolchain_url: https://musl.cc/arm-linux-musleabihf-cross.tgz
+            toolchain: arm-unknown-linux-musleabihf
 
             # RISCV64
           - arch: RISCV
             triple: riscv64-linux-musl
-            toolchain_url: https://musl.cc/riscv64-linux-musl-cross.tgz
+            toolchain: riscv64-unknown-linux-musl
 
             # PowerPC
           - arch: PowerPC
             triple: powerpc64le-linux-musl
-            toolchain_url: https://musl.cc/powerpc64le-linux-musl-cross.tgz
+            toolchain: powerpc64le-unknown-linux-musl
 
     runs-on: ubuntu-latest
 
@@ -221,10 +221,14 @@ jobs:
 
       - name: Download Musl Target Sysroot
         run: |
-          wget ${{ matrix.toolchain_url }} -O musl-cross.tgz
-          tar -xzf musl-cross.tgz
-          # This gives us a directory like 'aarch64-linux-musl-cross'
-          echo "SYSROOT_DIR=$(ls -d *-linux-musl*-cross)/${{ matrix.triple }}" >> $GITHUB_ENV
+          URL="https://github.com/cross-tools/musl-cross/releases/latest/download/${TARGET}.tar.xz"
+
+          echo "Downloading toolchain from $URL"
+          wget $URL -O musl-cross.tar.xz
+          tar -xf musl-cross.tar.xz
+          
+          # The inner target directory acts perfectly as the isolated sysroot
+          echo "SYSROOT_DIR=$(pwd)/${TARGET}/${TARGET}" >> $GITHUB_ENV
 
       - name: Build LLVM
         working-directory: llvm
@@ -238,8 +242,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=$(pwd)/${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=$(pwd)/${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=${{ env.SYSROOT_DIR }} -fuse-ld=lld" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
