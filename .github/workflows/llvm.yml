@@ -207,7 +207,7 @@ jobs:
           apk add --no-cache \
             clang lld \
             cmake ninja \
-            git curl wget nodejs npm
+            git curl wget gcompat
 
       - name: Checkout
         uses: actions/checkout@v6
