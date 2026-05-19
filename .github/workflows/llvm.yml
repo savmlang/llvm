@@ -218,7 +218,7 @@ jobs:
           apk add glibc.apk
 
       - name: Checkout
-        run: gh repo clone ${{ github.repository }}
+        run: gh repo clone ${{ github.repository }} llvmbuilds
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -285,7 +285,7 @@ jobs:
             -C llvm/install lib include bin
 
       - name: Upload Artifact
-        working-directory: scripts
+        working-directory: llvmbuilds/scripts
         run: |
           npm install @actions/artifact@v2
           node upload.mjs
