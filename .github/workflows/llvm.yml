@@ -207,7 +207,8 @@ jobs:
           apk add --no-cache \
             clang lld \
             cmake ninja \
-            git curl github-cli binutils
+            git curl github-cli binutils \
+            build-base musl-dev gcc libc-dev
 
           curl -Lo /etc/apk/keys/sgerrand.rsa.pub \
             https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
