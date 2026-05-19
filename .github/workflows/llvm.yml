@@ -177,11 +177,6 @@ jobs:
           - arch: X86
             triple: x86_64-linux-musl
 
-          # i686 (x86 32-bit)
-          - arch: X86
-            triple: i686-linux-musl
-            flags: -DCMAKE_C_FLAGS="-m32" -DCMAKE_CXX_FLAGS="-m32"
-
           # ARMv7 (HF)
           - arch: ARM
             triple: arm-linux-musleabihf
@@ -189,10 +184,6 @@ jobs:
             # RISCV64
           - arch: RISCV
             triple: riscv64-linux-musl
-
-            # PowerPC
-          - arch: PowerPC
-            triple: powerpc64le-linux-musl
 
     runs-on: ubuntu-latest
 
@@ -230,16 +221,16 @@ jobs:
           export CXX=clang++
           
 
-          # # LLVM Host
-          # cmake -G Ninja -S llvm -B build_native \
-          #   -DLLVM_TARGETS_TO_BUILD="Native" \
-          #   -DCMAKE_BUILD_TYPE=Release \
-          #   -DLLVM_USE_LINKER=lld
-          # ninja -C build_native llvm-tblgen
+          # LLVM Host
+          cmake -G Ninja -S llvm -B build_native \
+            -DLLVM_TARGETS_TO_BUILD="Native" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_USE_LINKER=lld
+          ninja -C build_native llvm-tblgen
 
-          # rm -rf .git
-          # cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
-          # rm -rf build_native
+          rm -rf .git
+          cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
+          rm -rf build_native
 
 
           # Cross Build
@@ -262,7 +253,7 @@ jobs:
             -DLLVM_ENABLE_PLUGINS=OFF \
             -DCMAKE_INSTALL_PREFIX=install \
             -DCMAKE_SYSROOT=/${{  matrix.triple }} \
-            -DLLVM_USE_LINKER=lld ${{ matrix.flags }} \
+            -DLLVM_USE_LINKER=lld \
             -DLLVM_ENABLE_ZLIB=OFF \
             -DLLVM_ENABLE_ZSTD=OFF \
             -DLLVM_ENABLE_TERMINFO=OFF \
