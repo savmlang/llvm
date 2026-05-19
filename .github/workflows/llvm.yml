@@ -230,16 +230,16 @@ jobs:
           export CXX=clang++
           
 
-          # LLVM Host
-          cmake -G Ninja -S llvm -B build_native \
-            -DLLVM_TARGETS_TO_BUILD="Native" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DLLVM_USE_LINKER=lld
-          ninja -C build_native llvm-tblgen
+          # # LLVM Host
+          # cmake -G Ninja -S llvm -B build_native \
+          #   -DLLVM_TARGETS_TO_BUILD="Native" \
+          #   -DCMAKE_BUILD_TYPE=Release \
+          #   -DLLVM_USE_LINKER=lld
+          # ninja -C build_native llvm-tblgen
 
-          rm -rf .git
-          cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
-          rm -rf build_native
+          # rm -rf .git
+          # cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
+          # rm -rf build_native
 
 
           # Cross Build
@@ -249,8 +249,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
