@@ -211,14 +211,6 @@ jobs:
             build-base musl-dev gcc libc-dev python3 py3-pip \
             zlib-dev
 
-          curl -Lo /etc/apk/keys/sgerrand.rsa.pub \
-            https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
-
-          curl -Lo glibc.apk \
-            https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk
-
-          apk add glibc.apk
-
       - name: Checkout
         run: gh repo clone ${{ github.repository }} llvmbuilds
         env:
@@ -257,8 +249,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -fuse-ld=lld" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -DCMAKE_SYSROOT=/${{ matrix.triple }} -fuse-ld=lld" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -DCMAKE_SYSROOT=/${{ matrix.triple }} -fuse-ld=lld" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
@@ -363,12 +355,6 @@ jobs:
             dpkg: sudo dpkg --add-architecture ppc64el
             script: |
               sudo apt-get install -y --fix-missing libc6:ppc64el libgcc1:ppc64el
-
-            # MIPS64
-          - arch: Mips
-            install: clang lld libc6-dev-mips64el-cross gcc-mips64el-linux-gnuabi64
-              g++-mips64el-linux-gnuabi64 binutils-mips64el-linux-gnuabi64
-            triple: mips64el-linux-gnuabi64
 
     runs-on: ubuntu-latest
 
