@@ -207,10 +207,18 @@ jobs:
           apk add --no-cache \
             clang lld \
             cmake ninja \
-            git curl wget gcompat
+            git curl github-cli gcompat binutils
+
+          curl -Lo /etc/apk/keys/sgerrand.rsa.pub \
+            https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+
+          curl -Lo glibc.apk \
+            https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.39-r0/glibc-2.39-r0.apk
+
+          apk add glibc.apk
 
       - name: Checkout
-        uses: actions/checkout@v6
+        run: gh repo clone ${{ github.repository }}
 
       - name: Checkout LLVM
         uses: actions/checkout@v6
