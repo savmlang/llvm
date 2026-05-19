@@ -218,7 +218,7 @@ jobs:
           apk add glibc.apk
 
       - name: Checkout
-        run: gh repo clone ${{ github.repository }}
+        uses: actions/checkout@v6
 
       - name: Checkout LLVM
         uses: actions/checkout@v6
