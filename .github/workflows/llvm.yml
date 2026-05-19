@@ -218,15 +218,16 @@ jobs:
           apk add glibc.apk
 
       - name: Checkout
-        uses: actions/checkout@v6
+        run: gh repo clone ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout LLVM
-        uses: actions/checkout@v6
-        with:
-          repository: llvm/llvm-project
-          path: llvm
-          fetch-depth: 1
-          ref: ${{ env.llvmversion }}
+        run: |
+          gh repo clone llvm/llvm-project llvm \
+            -- --depth=1 --branch "${{ env.llvmversion }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build LLVM
         working-directory: llvm
@@ -284,11 +285,17 @@ jobs:
             -C llvm/install lib include bin
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: llvm-static-${{ matrix.triple }}
-          path: llvm-static-${{ matrix.triple }}.tar.gz
-          archive: true
+        working-directory: scripts
+        run: |
+          npm install @actions/artifact@v2
+          node upload.mjs
+        env:
+          ACTIONS_RUNTIME_URL: ${{ env.ACTIONS_RUNTIME_URL }}
+          ACTIONS_RUNTIME_TOKEN: ${{ env.ACTIONS_RUNTIME_TOKEN }}
+          ACTIONS_CACHE_URL: ${{ env.ACTIONS_CACHE_URL }}
+
+          ARTIFACT_NAME: llvm-static-${{ matrix.triple }}
+          ARTIFACT_PATH: ../llvm-static-${{ matrix.triple }}.tar.gz
 
   linux:
     name: Build LLVM (${{ matrix.triple }})
