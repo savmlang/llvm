@@ -250,7 +250,7 @@ jobs:
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
             -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax -isystem /${{ matrix.triple }}/include/c++/11.2.1 -isystem /${{ matrix.triple }}/include/c++/11.2.1/${{ matrix.triple }}" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
