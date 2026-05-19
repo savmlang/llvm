@@ -213,7 +213,7 @@ jobs:
             https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
 
           curl -Lo glibc.apk \
-            https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.39-r0/glibc-2.39-r0.apk
+            https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.35-r1/glibc-2.35-r1.apk
 
           apk add glibc.apk
 
