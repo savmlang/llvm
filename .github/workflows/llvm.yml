@@ -162,127 +162,6 @@ jobs:
           path: llvm-static-${{ matrix.triple }}.tar.gz
           archive: true
 
-  linux_musl:
-    name: Build LLVM MUSL-Alpine (${{ matrix.triple }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # Arm64
-          - arch: AArch64
-            triple: aarch64-linux-musl
-
-            # x86_64 (x64)
-          - arch: X86
-            triple: x86_64-linux-musl
-
-          # ARMv7 (HF)
-          - arch: ARM
-            triple: arm-linux-musleabihf
-
-            # RISCV64
-          - arch: RISCV
-            triple: riscv64-linux-musl
-
-    runs-on: ubuntu-latest
-
-    container:
-      image: docker.io/muslcc/x86_64:${{ matrix.triple }}
-      options: --privileged
-
-    steps:
-      - name: Install Dependencies
-        run: |
-          apk update
-          apk add --no-cache \
-            clang lld \
-            cmake ninja \
-            git curl github-cli binutils \
-            build-base musl-dev gcc libc-dev python3 py3-pip \
-            zlib-dev
-
-      - name: Checkout
-        run: gh repo clone ${{ github.repository }} llvmbuilds
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Checkout LLVM
-        run: |
-          gh repo clone llvm/llvm-project llvm \
-            -- --depth=1 --branch "${{ env.llvmversion }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build LLVM
-        working-directory: llvm
-        run: |
-          export CC=clang
-          export CXX=clang++
-          
-
-          # LLVM Host
-          cmake -G Ninja -S llvm -B build_native \
-            -DLLVM_TARGETS_TO_BUILD="Native" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DLLVM_USE_LINKER=lld
-          ninja -C build_native llvm-tblgen
-
-          rm -rf .git
-          cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
-          rm -rf build_native
-
-
-          # Cross Build
-          cmake -G Ninja -S llvm -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax -latomic -pthread" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -I/lib/gcc/${{ matrix.triple }}/11.2.1/include -B/lib/gcc/${{ matrix.triple }}/11.2.1/ -L/lib/gcc/${{ matrix.triple }}/11.2.1/ -fuse-ld=lld -mno-relax -isystem /${{ matrix.triple }}/include/c++/11.2.1 -isystem /${{ matrix.triple }}/include/c++/11.2.1/${{ matrix.triple }} -latomic -pthread" \
-            -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
-            -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
-            -DLLVM_BUILD_STATIC=ON \
-            -DLLVM_BUILD_TOOLS=OFF \
-            -DLLVM_TOOL_LTO_BUILD=OFF \
-            -DLLVM_ENABLE_PROJECTS="llvm;lld" \
-            -DLLVM_INCLUDE_TESTS=OFF \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DLLVM_ENABLE_PLUGINS=OFF \
-            -DCMAKE_INSTALL_PREFIX=install \
-            -DCMAKE_SYSROOT=/${{  matrix.triple }} \
-            -DLLVM_USE_LINKER=lld \
-            -DLLVM_ENABLE_ZLIB=OFF \
-            -DLLVM_ENABLE_ZSTD=OFF \
-            -DLLVM_ENABLE_TERMINFO=OFF \
-            -DLLVM_STATIC_LINK_CXX_STDLIB=ON
-
-          ninja -C build llvm-config 
-          ninja -C build install
-
-          mkdir -p install/bin
-          cp build/bin/llvm-config* install/bin/
-
-      - name: Tar
-        run: |
-          tar -czvf llvm-static-${{ matrix.triple }}.tar.gz \
-            -C llvm/install lib include bin
-
-      - name: Upload Artifact
-        working-directory: llvmbuilds/scripts
-        run: |
-          npm install @actions/artifact@v2
-          node upload.mjs
-        env:
-          ACTIONS_RUNTIME_URL: ${{ env.ACTIONS_RUNTIME_URL }}
-          ACTIONS_RUNTIME_TOKEN: ${{ env.ACTIONS_RUNTIME_TOKEN }}
-          ACTIONS_CACHE_URL: ${{ env.ACTIONS_CACHE_URL }}
-
-          ARTIFACT_NAME: llvm-static-${{ matrix.triple }}
-          ARTIFACT_PATH: ../llvm-static-${{ matrix.triple }}.tar.gz
-
   linux:
     name: Build LLVM (${{ matrix.triple }})
 
@@ -445,7 +324,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [ windows, macos, linux, linux_musl ]
+    needs: [ windows, macos, linux ]
 
     steps:
       - name: Checkout
