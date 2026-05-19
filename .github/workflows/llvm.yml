@@ -208,7 +208,8 @@ jobs:
             clang lld \
             cmake ninja \
             git curl github-cli binutils \
-            build-base musl-dev gcc libc-dev
+            build-base musl-dev gcc libc-dev python3 py3-pip \
+            zlib-dev py3-pyyaml
 
           curl -Lo /etc/apk/keys/sgerrand.rsa.pub \
             https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
