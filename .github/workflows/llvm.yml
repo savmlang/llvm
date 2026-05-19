@@ -205,9 +205,9 @@ jobs:
         run: |
           apk update
           apk add --no-cache \
-            clang lld qemu-img qemu-system-ppc64 binfmt-support \
+            clang lld \
             cmake ninja \
-            git curl wget qemu-user-static-binfmt
+            git curl wget
 
       - name: Checkout
         uses: actions/checkout@v6
@@ -225,10 +225,24 @@ jobs:
         run: |
           export CC=clang
           export CXX=clang++
+          
+
+          # LLVM Host
+          cmake -G Ninja -S llvm -B build_native \
+            -DLLVM_TARGETS_TO_BUILD="Native" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_USE_LINKER=lld
+          ninja -C build_native llvm-tblgen
+
+          rm -rf .git
+          cp $(pwd)/build_native/bin/llvm-tblgen $(pwd)/native-llvm-tblgen
+          rm -rf build_native
+
 
           # Cross Build
           cmake -G Ninja -S llvm -B build \
             -DCMAKE_BUILD_TYPE=Release \
+            -DLLVM_TABLEGEN=$(pwd)/native-llvm-tblgen \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
@@ -248,8 +262,7 @@ jobs:
             -DLLVM_ENABLE_ZLIB=OFF \
             -DLLVM_ENABLE_ZSTD=OFF \
             -DLLVM_ENABLE_TERMINFO=OFF \
-            -DLLVM_STATIC_LINK_CXX_STDLIB=ON \
-            -DLLVM_FORCE_USE_OLD_TOOLCHAIN=ON # Safety: Definitely Vibes Checked, though its g++ 16.1.0
+            -DLLVM_STATIC_LINK_CXX_STDLIB=ON
 
           ninja -C build llvm-config 
           ninja -C build install
