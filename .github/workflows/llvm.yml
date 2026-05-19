@@ -249,8 +249,8 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_C_COMPILER=clang \
             -DCMAKE_CXX_COMPILER=clang++ \
-            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} -DCMAKE_SYSROOT=/${{ matrix.triple }} -fuse-ld=lld" \
-            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} -DCMAKE_SYSROOT=/${{ matrix.triple }} -fuse-ld=lld" \
+            -DCMAKE_C_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -fuse-ld=lld" \
+            -DCMAKE_CXX_FLAGS="--target=${{ matrix.triple }} --sysroot=/${{ matrix.triple }} -fuse-ld=lld" \
             -DLLVM_DEFAULT_TARGET_TRIPLE=${{ matrix.triple }} \
             -DLLVM_TARGETS_TO_BUILD="${{ matrix.arch }}" \
             -DLLVM_BUILD_STATIC=ON \
@@ -261,6 +261,7 @@ jobs:
             -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
             -DLLVM_ENABLE_PLUGINS=OFF \
             -DCMAKE_INSTALL_PREFIX=install \
+            -DCMAKE_SYSROOT=/${{  matrix.triple }} \
             -DLLVM_USE_LINKER=lld ${{ matrix.flags }} \
             -DLLVM_ENABLE_ZLIB=OFF \
             -DLLVM_ENABLE_ZSTD=OFF \
