@@ -1,4 +1,4 @@
-name: Build LLVM 22.1 Static
+name: Build LLVM Static
 
 on:
   push:
