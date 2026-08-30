@@ -4,8 +4,6 @@ on:
   push:
     paths:
       - .github/workflows/llvm.yml
-  schedule:
-    - cron: "0 0 1 * *"
   workflow_dispatch:
     inputs:
       llvmversion:
@@ -19,7 +17,7 @@ permissions:
   actions: read
 
 env:
-  llvmversion: ${{ github.event.inputs.llvmversion || 'llvmorg-22.1.3' }}
+  llvmversion: ${{ github.event.inputs.llvmversion }}
 
 jobs:
   windows:
